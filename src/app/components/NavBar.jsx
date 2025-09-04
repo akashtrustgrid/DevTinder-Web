@@ -1,12 +1,12 @@
 import axios from "axios";
-import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router";
-import { logout } from "../core/userSlice";
+import { removeUser } from "../core/userSlice";
 import { BASE_URL } from "../utils/constants";
 
 function NavBar() {
   const user = useSelector((state) => state.user);
+  console.log(user);
 
   const dispatch = useDispatch();
   const navigation = useNavigate();
@@ -19,7 +19,7 @@ function NavBar() {
         { witcredentials: true }
       );
       if (res.status === 200) {
-        dispatch(logout());
+        dispatch(removeUser());
         navigation("/login");
       }
     } catch (error) {
@@ -36,7 +36,7 @@ function NavBar() {
       </div>
       {user && (
         <div className="flex items-center">
-          Welcome {user.firstName[0].toUpperCase() + user.firstName.slice(1)}
+          Welcome {user.firstName}
           <div className="dropdown dropdown-end mx-5">
             <div
               tabIndex={0}
@@ -44,10 +44,7 @@ function NavBar() {
               className="btn btn-ghost btn-circle avatar"
             >
               <div className="w-10 rounded-full">
-                <img
-                  alt="Tailwind CSS Navbar component"
-                  src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-                />
+                <img alt="Tailwind CSS Navbar component" src={user.imageUrl} />
               </div>
             </div>
             <ul

@@ -1,16 +1,27 @@
 import axios from "axios";
-import React from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { login } from "../core/userSlice";
+import { addUser } from "../core/userSlice";
 import { useNavigate } from "react-router";
 import { BASE_URL } from "../utils/constants";
 
 function Login() {
-  const [emailId, setEmailId] = React.useState("");
-  const [password, setPassword] = React.useState("");
+  const [emailId, setEmailId] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [isLogin, setIsLogin] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const dispatch = useDispatch();
   const navigation = useNavigate();
+
+  useEffect(() => {
+    if (errorMessage === "") return;
+    setTimeout(() => {
+      setErrorMessage("");
+    }, 3000);
+  }, [errorMessage]);
 
   const handleLogin = async () => {
     try {
@@ -24,12 +35,42 @@ function Login() {
           withCredentials: true,
         }
       );
-      if (res.status === 200) {
-        dispatch(login(res.data.data));
+      console.log(res.data);
+
+      if (res.data.data) {
+        setErrorMessage("Login successful!");
+        dispatch(addUser(res.data.data));
         navigation("/");
       }
     } catch (error) {
-      console.error("ERROR:" + error);
+      console.error("ERROR:" + error.response.data);
+      setErrorMessage(error.response.data);
+    }
+  };
+
+  const handleSignUp = async () => {
+    try {
+      const res = await axios.post(
+        BASE_URL + "/signup",
+        {
+          firstName: firstName,
+          lastName: lastName,
+          emailId: emailId,
+          password: password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (res.data.data) {
+        setErrorMessage("Your account has been created successful!");
+        dispatch(addUser(res.data.data));
+        navigation("/profile");
+      }
+    } catch (error) {
+      console.error("ERROR:" + error.response.data);
+      setErrorMessage(error.response.data);
     }
   };
 
@@ -38,8 +79,34 @@ function Login() {
       <div className="card w-96 bg-base-200 card-lg shadow-sm">
         <div className="card-body">
           <h2 className="card-title justify-center my-2">
-            Enter your credentials
+            {isLogin ? "Enter your credentials" : "Create your Account"}
           </h2>
+          {!isLogin && (
+            <>
+              <fieldset className="fieldset">
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="First Name"
+                  value={firstName}
+                  onChange={(e) => {
+                    setFirstName(e.target.value);
+                  }}
+                />
+              </fieldset>
+              <fieldset className="fieldset">
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="Last Name"
+                  value={lastName}
+                  onChange={(e) => {
+                    setLastName(e.target.value);
+                  }}
+                />
+              </fieldset>
+            </>
+          )}
           <label className="input validator my-2">
             <svg
               className="h-[1em] opacity-50"
@@ -92,20 +159,44 @@ function Login() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </label>
-          <p className="validator-hint hidden">
+          <div className="validator-hint hidden">
             Must be more than 8 characters, including
             <br />
             At least one number <br />
             At least one lowercase letter <br />
             At least one uppercase letter
-          </p>
+          </div>
           <div className="justify-center card-actions">
-            <button className="btn btn-primary mt-4" onClick={handleLogin}>
-              Login
+            <button
+              className="btn btn-primary mt-4 mx-3"
+              onClick={isLogin ? handleLogin : handleSignUp}
+            >
+              {isLogin ? "Login" : "Sign Up"}
             </button>
           </div>
         </div>
+        <p
+          className="flex justify-center mb-6 cursor-pointer"
+          onClick={() => {
+            setIsLogin(!isLogin);
+          }}
+        >
+          {isLogin
+            ? "Don't have an account? Sign up"
+            : "Already have an account? Login"}
+        </p>
       </div>
+      {errorMessage !== "" && (
+        <div className="toast toast-top toast-center my-15">
+          <div
+            className={`alert ${
+              errorMessage.includes("ERROR") ? "alert-error" : "alert-success"
+            }`}
+          >
+            <span>{errorMessage}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
