@@ -50,7 +50,7 @@ const Requests = () => {
   return (
     <>
       {receivedRequests.length > 0 && (
-        <ul className="list bg-base-200 rounded-full shadow-md my-15 mx-10">
+        <ul className="list bg-base-200 rounded-box shadow-md my-15 mx-10">
           {receivedRequests.map((request) => (
             <li className="list-row" key={request._id}>
               <div>

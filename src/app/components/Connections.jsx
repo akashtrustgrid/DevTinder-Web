@@ -29,7 +29,7 @@ const Connections = () => {
   return (
     <>
       {connections.length > 0 && (
-        <ul className="list bg-base-200 rounded-full shadow-md my-15 mx-10">
+        <ul className="list bg-base-200 rounded-box shadow-md my-15 mx-10">
           {connections.map((conn) => (
             <li className="list-row" key={conn._id}>
               <div>
